@@ -157,7 +157,7 @@ void draw(){
     values += lights[i].getValue();
   }
   
-  float targetValue = 2000; // variable to control overall light level
+  float targetValue = 3000; // variable to control overall light level
   float multiplier = targetValue / values;
 
   for (int i = 0; i < 17; i++){

@@ -3,27 +3,13 @@
 
 #define FADESPEED 5
 
-
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
-//#define __PROG_TYPES_COMPAT__
-//#include <avr/pgmspace.h>
-//#define CIELPWM(a) (pgm_read_word_near(CIEL8 + a)) // CIE Lightness loopup table
-
-
-// called this way, it uses the default address 0x40
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
-// you can also call it with a different address you want
-//Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x41);
+#include <avr/pgmspace.h>
 
-#if defined(ARDUINO_ARCH_SAMD)  
-// for Zero, output on USB Serial console, remove line below if using programming port to program the Zero!
-   #define Serial SerialUSB
-#endif
-
-
-int val[] = {
+PROGMEM const uint16_t lightMap[] = {
   1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,5,5,5,5,5,5,6,6,6,6,6,7,7,7,7,
   8,8,8,8,9,9,9,9,10,10,10,11,11,12,12,12,13,13,14,14,15,15,15,16,17,17,18,18,19,19,20,21,21,22,23,24,24,25,26,27,28,29,30,31,
   32,33,34,35,36,37,39,40,41,43,44,45,47,49,50,52,53,55,57,59,61,63,65,67,69,72,74,77,79,82,84,87,90,93,96,99,103,106,110,113,
@@ -32,6 +18,8 @@ int val[] = {
   884,914,944,975,1007,1041,1075,1111,1148,1186,1225,1266,1308,1351,1396,1442,1490,1539,1591,1643,1698,1754,1812,1872,1934,1999,
   2065,2133,2204,2277,2353,2431,2511,2594,2680,2769,2861,2956,3054,3155,3260,3368,3480,3595,3714,3837,3965,4096
  };
+ 
+#define val(x) pgm_read_word_near(lightMap + (x))
 
 /* Configure digital pins 9 and 10 as 16-bit PWM outputs. */
 void setupPWM16() {
@@ -74,12 +62,14 @@ void loop() {
   
   
   // set the brightness of pin 9:, 0-31, 5 bit steps of brightness
-//  analogWrite16(9, val[brightness+0]);
+  analogWrite16(9, val(brightness+0));
 //  analogWrite16(10, val[255-brightness]);
 
-  pwm.setPWM(15, 0, val[brightness+0] );
+  for (uint8_t pwmnum=0; pwmnum < 16; pwmnum++) {
+    pwm.setPWM(pwmnum, 0, val(brightness+0) );
+  }
   
-  Serial.println(val[brightness]);
+  Serial.println(val(brightness));
   
   // change the brightness for next time through the loop:
   brightness = brightness + fadeAmount;
